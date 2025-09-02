@@ -9,14 +9,18 @@ const defaultVersion = version
 class Router {
   constructor () {
     this._handler0 = null
+    this._handler1 = null
 
-    this._missing = 1
+    this._missing = 2
   }
 
   add (name, handler) {
     switch (name) {
       case '@registry/add-writer':
         this._handler0 = handler
+        break
+      case '@registry/put-entry':
+        this._handler1 = handler
         break
       default:
         throw new Error('Cannot register a handler for a nonexistent route: ' + name)
@@ -26,6 +30,7 @@ class Router {
 
   _checkAll () {
     assert(this._handler0 !== null, 'Missing handler for "@registry/add-writer"')
+    assert(this._handler1 !== null, 'Missing handler for "@registry/put-entry"')
   }
 
   async dispatch (message, context) {
@@ -40,6 +45,8 @@ class Router {
     switch (op.id) {
       case 0:
         return this._handler0(op.value, context)
+      case 1:
+        return this._handler1(op.value, context)
       default:
         throw new Error('Handler not found for ID:' + op.id)
     }
@@ -79,10 +86,18 @@ const route0 = {
   enc: getEncoding('@registry/writer')
 }
 
+const route1 = {
+  name: '@registry/put-entry',
+  id: 1,
+  enc: getEncoding('@registry/entry')
+}
+
 function getRouteByName (name) {
   switch (name) {
     case '@registry/add-writer':
       return route0
+    case '@registry/put-entry':
+      return route1
     default:
       throw new Error('Handler not found for name: ' + name)
   }
@@ -92,6 +107,8 @@ function getRouteById (id) {
   switch (id) {
     case 0:
       return route0
+    case 1:
+      return route1
     default:
       throw new Error('Handler not found for ID: ' + id)
   }

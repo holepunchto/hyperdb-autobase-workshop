@@ -15,7 +15,6 @@ test('put and get record', async t => {
   })
 
   const e1 = await registry.get('e1')
-  console.log(e1)
   delete e1.owner // Hack so the test doesn't break when adding the owner field
   t.alike(
     e1,

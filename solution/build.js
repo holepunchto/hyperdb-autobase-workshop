@@ -97,5 +97,10 @@ function setupDispatch () {
     requestType: '@registry/writer'
   })
 
+  namespace.register({
+    name: 'put-entry',
+    requestType: '@registry/entry'
+  })
+
   Hyperdispatch.toDisk(dispatch)
 }
