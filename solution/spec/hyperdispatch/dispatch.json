@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "offset": 0,
+  "schema": [
+    {
+      "id": 0,
+      "name": "@registry/add-writer",
+      "requestType": "@registry/writer",
+      "version": 1
+    }
+  ]
+}
