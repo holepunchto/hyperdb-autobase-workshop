@@ -180,7 +180,7 @@ async function setupFirstIndexer (t, bootstrap) {
   const { store, swarm } = await getStoreAndSwarm(t, bootstrap)
 
   const service = new RegistryService(store.namespace('registry'), swarm, {
-    ackInterval: 0
+    ackInterval: 10
   })
 
   t.teardown(async () => {
