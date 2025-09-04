@@ -10,7 +10,7 @@ const { resolveStruct } = require('./spec/hyperschema')
 const EntryEnc = resolveStruct('@registry/entry')
 
 class RegistryService extends ReadyResource {
-  constructor (store, swarm, { ackInterval, bootstrap } = {}) {
+  constructor (store, swarm, { ackInterval, autobaseBootstrap = null } = {}) {
     super()
 
     this.store = store
@@ -20,7 +20,7 @@ class RegistryService extends ReadyResource {
     this.applyRouter.add(
       '@registry/add-writer',
       async (data, context) => {
-        await context.base.addWriter(data.key)
+        await context.base.addWriter(data.key, { indexer: true })
       }
     )
     this.applyRouter.add(
@@ -30,7 +30,7 @@ class RegistryService extends ReadyResource {
       }
     )
 
-    this.base = new Autobase(this.store, bootstrap, {
+    this.base = new Autobase(this.store, autobaseBootstrap, {
       open: this._openAutobase.bind(this),
       apply: this._apply.bind(this),
       close: this._closeAutobase.bind(this),
@@ -56,6 +56,17 @@ class RegistryService extends ReadyResource {
     })
     // To connect to other indexers
     this.swarm.join(this.base.discoveryKey, { server: true, client: true })
+
+    if (this.base.isIndexer) {
+      console.log('is indexer logic runs')
+      // Hack to ensure our db key does not update after the first
+      // entry is added (since we update the autobase ourselves)
+      if (!this.view.db.core.length) await this.base.append(null)
+    }
+
+    // TODO: also set this download if the view rotates (consider also joining the swarm there)
+    // Ensure each writer has the full view
+    this.view.db.core.download({ start: 0, end: -1 })
   }
 
   async _close () {
