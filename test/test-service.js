@@ -105,16 +105,10 @@ test('Can put an entry over RPC and access externally', async (t) => {
   }
 })
 
-test.solo('3 indexers put entry happy path', async (t) => {
-  t.plan(7)
+test('3 indexers put entry happy path', async (t) => {
+  t.plan(3)
 
-  const { bootstrap, writer1, writer2, writer3 } = await setup3IndexerService(t)
-
-  t.is(writer2.base.isIndexer, true, 'sanity check')
-  t.is(writer3.base.isIndexer, true, 'sanity check')
-
-  t.alike(writer2.view.publicKey, writer1.view.publicKey, 'sanity check: consistent views')
-  t.alike(writer3.view.publicKey, writer1.view.publicKey, 'sanity check: consistent views')
+  const { bootstrap, writer1 } = await setup3IndexerService(t)
 
   const viewDiscKey = writer1.view.discoveryKey
   {
@@ -122,10 +116,10 @@ test.solo('3 indexers put entry happy path', async (t) => {
     swarm.join(viewDiscKey)
     await swarm.flush()
     if (DEBUG) console.log('reader POV init length', registry.db.core.length)
-    console.log('reader POV core disc key', registry.db.core.discoveryKey)
+    if (DEBUG) console.log('reader POV core disc key', registry.db.core.discoveryKey)
     registry.db.core.on('append', async () => {
       const res = await registry.get('e1')
-      t.alike(res, inputEntry)
+      t.alike(res, inputEntry, 'entry visible in view')
     })
   }
 
@@ -147,6 +141,92 @@ test.solo('3 indexers put entry happy path', async (t) => {
     t.alike(viewDiscKey, writer1.view.discoveryKey, 'sanity check: view did not rotate')
     console.log('now disc key', writer1.view.discoveryKey)
   }
+})
+
+test('3 indexers put entry not processed when only 1 indexer online', async (t) => {
+  t.plan(6)
+  const tFirstPut = t.test('first put')
+  tFirstPut.plan(1)
+  const tPut2 = t.test('second put')
+  tPut2.plan(1)
+
+
+  const { bootstrap, writer1, writer2, writer3 } = await setup3IndexerService(t)
+
+  const viewDiscKey = writer1.view.discoveryKey
+  {
+    const { registry, swarm } = await getReader(t, bootstrap, writer1.view.publicKey)
+    swarm.join(viewDiscKey)
+    await swarm.flush()
+    let nrAppends = 0
+    registry.db.core.on('append', async () => {
+      console.log('Client saw registry update to length', registry.db.core.length)
+      nrAppends++
+      if (nrAppends === 1) {
+        first = false
+        const res = await registry.get('e1')
+        tFirstPut.alike(res, inputEntry, 'entry visible in view')
+      } else if (nrAppends === 2) {
+        const res = await registry.get('e2')
+        tPut2.alike(res.name, 'e2', 'entry2 visible in view')
+      } else {
+        t.fail('saw too many appends (e3 got processed?)')
+      }
+    })
+  }
+
+  const { client } = await setupRpcClient(t, writer1.serverPublicKey, bootstrap)
+  const inputEntry = {
+    name: 'e1',
+    driveKey: b4a.from('a'.repeat(64), 'hex'),
+    type: 'type1',
+    owner: 'someone',
+    description: 'a model'
+  }
+
+  await client.putEntry(inputEntry)
+  {
+    const res = await writer1.view.get('e1')
+    t.alike(res, inputEntry, 'sanity check: processed locally')
+  }
+  await tFirstPut
+
+  // 1 indexer goes down... (still processing)
+  await writer2.close()
+
+  await client.putEntry({
+    name: 'e2',
+    driveKey: b4a.from('b'.repeat(64), 'hex'),
+    type: 'type1',
+    owner: 'someone',
+    description: 'a model'
+  })
+  {
+    const res = await writer1.view.get('e2')
+    t.alike(res.name, 'e2', 'sanity check: e2 processed locally')
+  }
+  await tPut2
+
+  // second indexer goes down, can no longer process...
+  await writer3.close()
+
+  await client.putEntry({
+    name: 'e3',
+    driveKey: b4a.from('c'.repeat(64), 'hex'),
+    type: 'type1',
+    owner: 'someone',
+    description: 'a model'
+  })
+  {
+    const res = await writer1.view.get('e3')
+    t.alike(res.name, 'e3', 'sanity check: e3 processed locally')
+  }
+
+  // Give time for the test to fail if it does get processed
+  await new Promise(resolve => setTimeout(resolve, 500))
+  t.pass('Entry did not get processed when 2 indexers are down')
+
+  // TODO: add recover path when indexer comes back online?
 })
 
 async function getReader (t, bootstrap, registryKey) {
@@ -226,6 +306,11 @@ async function setup3IndexerService (t) {
   writer2.swarm.join(viewDiscKey)
   writer3.swarm.join(viewDiscKey)
   await new Promise(resolve => setTimeout(resolve, 100)) // swarm flush
+
+  if (!writer2.base.isIndexer) throw new Error('test setup bug')
+  if (!writer3.base.isIndexer) throw new Error('test setup bug')
+  if (!b4a.equals(writer2.view.publicKey, service.view.publicKey)) throw new Error('test setup bug')
+  if (!b4a.equals(writer3.view.publicKey, service.view.publicKey)) throw new Error('test setup bug')
 
   return { writer1: service, writer2, writer3, bootstrap }
 }
