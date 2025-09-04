@@ -204,7 +204,7 @@ async function setupWriter (t, bootstrap, originalIndexer) {
 
   await writer.ready()
   await Promise.all([
-    once(writer.base, 'writable'),
+    once(writer.base, 'is-indexer'),
     originalIndexer.addWriter(writer.base.local.key)
   ])
 
@@ -220,18 +220,6 @@ async function setup3IndexerService (t) {
 
   const { writer: writer2 } = await setupWriter(t, bootstrap, service)
   const { writer: writer3 } = await setupWriter(t, bootstrap, service)
-
-  console.log('writer pre disc key', service.view.discoveryKey)
-  // Rotate view
-  await writer2.base.append(null)
-  await writer3.base.append(null)
-  await service.base.append(null)
-  await new Promise(resolve => setTimeout(resolve, 100)) // swarm flush
-  await writer2.base.append(null)
-  await writer3.base.append(null)
-  await service.base.append(null)
-  await new Promise(resolve => setTimeout(resolve, 100)) // swarm flush
-  console.log('writer post disc key', service.view.discoveryKey)
 
   const viewDiscKey = service.view.discoveryKey
   service.swarm.join(viewDiscKey)

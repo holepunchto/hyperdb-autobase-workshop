@@ -58,7 +58,6 @@ class RegistryService extends ReadyResource {
     this.swarm.join(this.base.discoveryKey, { server: true, client: true })
 
     if (this.base.isIndexer) {
-      console.log('is indexer logic runs')
       // Hack to ensure our db key does not update after the first
       // entry is added (since we update the autobase ourselves)
       if (!this.view.db.core.length) await this.base.append(null)
