@@ -24,8 +24,21 @@ Using autobase solves both problems. For example, with 3 writer instances for th
   - 2 instances can go down and you will still accept requests (they will be processed when at least 1 of the other instances comes back)
   - 1 instance can be irrecoverably lost (for example due to a hard disk crash), and you can use the other 2 to rotate it out and rotate in a new instance
 
-In today's workshop, we will extend our AI-model registry of the previous workshop to use autobase.
+In today's workshop, we will extend our AI-model registry of the previous workshop to use autobase. The steps are:
 
-We will then simulate all of the above scenarios, to illustrate concretely how autobase solves them.
+1) Create an autobase service with an add-writer operation
+2) Create an RPC layer, so records can be added remotely
+3) Create a CLI to run the service
+4) Create a client to communicate with the RPC
+5) Deploy a 3-writer setup
 
-In the process, you will get to know the patterns we use to create autobase+hyperdb services.
+## Demo
+
+### 1. Create an autobase service with an add-writer operation
+
+## Assignment
+
+After the demo, you should have sufficient knowledge to do the following on your own:
+
+- Add the ability to remove writers
+- Add aditional db operations and endpoints
