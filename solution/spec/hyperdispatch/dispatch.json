@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "offset": 0,
+  "schema": [
+    {
+      "id": 0,
+      "name": "@registry/add-writer",
+      "requestType": "@registry/writer",
+      "version": 1
+    },
+    {
+      "id": 1,
+      "name": "@registry/put-entry",
+      "requestType": "@registry/entry",
+      "version": 2
+    }
+  ]
+}
