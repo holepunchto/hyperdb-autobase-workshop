@@ -2,7 +2,7 @@ const test = require('brittle')
 const Corestore = require('corestore')
 const b4a = require('b4a')
 
-const Registry = require('../solution/lib/db')
+const Registry = require('../lib/db')
 
 test('put and get record', async t => {
   const { registry } = await setup(t)

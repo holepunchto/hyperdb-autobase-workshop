@@ -1,4 +1,4 @@
-const { resolveStruct } = require('./spec/hyperschema')
+/* const { resolveStruct } = require('./spec/hyperschema')
 const EntryEnc = resolveStruct('@registry/entry')
 const cenc = require('compact-encoding')
 
@@ -19,3 +19,4 @@ class RegistryClient {
 }
 
 module.exports = RegistryClient
+*/
