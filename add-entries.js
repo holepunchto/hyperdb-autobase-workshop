@@ -37,7 +37,7 @@ async function main () {
   // Let indexers sync
   await new Promise(resolve => setTimeout(resolve, 500))
 
-  const swarm = new Hyperswarm( { dht })
+  const swarm = new Hyperswarm({ dht })
   const store = new Corestore('client-corestore')
   swarm.on('connection', c => {
     console.log('lookup client opened connection')
