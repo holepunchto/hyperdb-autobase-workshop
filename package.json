@@ -32,6 +32,7 @@
     "pino-pretty": "^13.1.1",
     "protomux-rpc": "^1.7.1",
     "protomux-rpc-client": "^2.0.2",
+    "protomux-rpc-client-pool": "^1.0.0",
     "ready-resource": "^1.1.2"
   },
   "devDependencies": {

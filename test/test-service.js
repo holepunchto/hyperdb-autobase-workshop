@@ -45,21 +45,7 @@ test('Can add an additional indexer', async (t) => {
 
   service2.base.once('is-indexer', () => {
     t.pass('writer detected it is an indexer')
-    console.log(service2.base.isIndexer)
   })
-
-  // TODO: debug
-  /* service2.base.on('update', async () => {
-    console.log('update', service2.base.linearizer.indexers)
-    if (service2.base.linearizer.indexers.length === 2) {
-      t.pass('2 indexers from the POV of the new indexer')
-    }
-  })
-  service.base.on('update', async () => {
-    if (service.base.linearizer.indexers.length === 2) {
-      t.pass('2 indexers from the POV of the old indexer')
-    }
-  }) */
 
   await service2.ready()
   await service.addWriter(service2.base.local.key)
@@ -86,7 +72,6 @@ test('Can put an entry over RPC and access externally', async (t) => {
     swarm.join(registry.discoveryKey)
     await swarm.flush()
     if (DEBUG) console.log('reader POV init length', registry.db.core.length)
-    console.log('reader POV core disc key', registry.db.core.discoveryKey)
     registry.db.core.on('append', async () => {
       const res = await registry.get('e1')
       t.alike(res, inputEntry)
@@ -135,7 +120,6 @@ test('3 indexers put entry happy path', async (t) => {
     owner: 'someone',
     description: 'a model'
   }
-  console.log('disc key pre put', writer1.view.discoveryKey)
 
   await client.putEntry(inputEntry)
 
@@ -143,7 +127,6 @@ test('3 indexers put entry happy path', async (t) => {
     const res = await writer1.view.get('e1')
     t.alike(res, inputEntry, 'sanity check: processed by indexer')
     t.alike(viewDiscKey, writer1.view.discoveryKey, 'sanity check: view did not rotate')
-    console.log('now disc key', writer1.view.discoveryKey)
   }
 })
 
@@ -163,7 +146,6 @@ test('3 indexers put entry not processed when only 1 indexer online', async (t) 
     await swarm.flush()
     let nrAppends = 0
     registry.db.core.on('append', async () => {
-      console.log('Client saw registry update to length', registry.db.core.length)
       nrAppends++
       if (nrAppends === 1) {
         const res = await registry.get('e1')
