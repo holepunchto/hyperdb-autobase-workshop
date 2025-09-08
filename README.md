@@ -56,6 +56,34 @@ This lets records be added remotely.
 
 The server side uses [Protomux RPC](https://github.com/holepunchto/protomux-rpc) to define the endpoints. The client side uses [Protomux-RPC Client](https://github.com/holepunchto/protomux-rpc-client) to access them.
 
+### 3. Run the services over a CLI
+
+The CLI is already made for you, at bin.js. It includes 2 methods:
+- run
+- admin-add-writer
+
+To start the service, open 3 terminal windows.
+
+- Window 1: `node bin.js run`
+- Window 2: `node bin.js run --storage store2 --bootstrap <autobase key>`
+- Window 3: `node bin.js run --storage store3 --bootstrap <autobase key>`
+
+End the Window-1 process, and run:
+- Window 1: `node bin.js admin-add-writer <Window-2 Local key>`
+
+Wait until Window-2 reports it has become an indexer. Then end the Window-1 process and run:
+- Window 1: `node bin.js admin-add-writer <Window-3 Local key>`
+
+Wait until Window-3 reports it has become an indexer. Then end all 3 processes, and:
+
+- Window 1: `node bin.js run`
+- Window 2: `node bin.js run --storage store2 --bootstrap <autobase key>`
+- Window 3: `node bin.js run --storage store3 --bootstrap <autobase key>`
+
+You now have a 3-writer service with a stable view key.
+
+Use the [add-entries.js](add-entries.js) script to add a few entries, and note how it contacts a random RPC server each run.
+
 ## Assignment
 
 After the demo, you should have sufficient knowledge to do the following on your own:
