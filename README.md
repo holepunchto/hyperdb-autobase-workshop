@@ -88,4 +88,5 @@ Use the [add-entries.js](add-entries.js) script to add a few entries, and note h
 After the demo, you should have sufficient knowledge to do the following on your own:
 
 - Add the ability to remove writers
-- Add aditional db operations and endpoints
+- Add a delete-entry endpoint
+- [Use protomux-rpc-client-pool](https://github.com/holepunchto/protomux-rpc-client-pool) in the client, to cleanly handle load balancing and automatically switching backends if one fails
