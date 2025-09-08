@@ -45,6 +45,9 @@ const runCmd = command('run',
     logger.info(`Using storage: ${storage}`)
     await service.ready()
 
+    // So other peers can look up entries
+    swarm.join(service.view.discoveryKey)
+
     if (service.base.isIndexer) {
       logger.info('I am an indexer in the autobase.')
     } else {
