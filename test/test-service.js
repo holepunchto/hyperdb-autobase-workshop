@@ -74,7 +74,7 @@ test.skip('Can put an entry over RPC and access externally', async (t) => {
     if (DEBUG) console.log('reader POV init length', registry.db.core.length)
     registry.db.core.on('append', async () => {
       const res = await registry.get('e1')
-      t.alike(res, inputEntry)
+      t.alike(res, inputEntry, 'reader processed the entry')
     })
   }
 
@@ -97,7 +97,7 @@ test.skip('Can put an entry over RPC and access externally', async (t) => {
 test.skip('3 indexers put entry happy path', async (t) => {
   t.plan(3)
 
-  const { bootstrap, writer1 } = await setup3IndexerService(t)
+  const { bootstrap, writer1, writer2 } = await setup3IndexerService(t)
 
   const viewDiscKey = writer1.view.discoveryKey
   {
@@ -123,18 +123,22 @@ test.skip('3 indexers put entry happy path', async (t) => {
 
   await client.putEntry(inputEntry)
 
+  // Give some time for the enw entry to get indexed
+  await new Promise(resolve => setTimeout(resolve, 500))
+
   {
-    const res = await writer1.view.get('e1')
-    t.alike(res, inputEntry, 'sanity check: processed by indexer')
+    // Note: we look up on another writer, to ensure the writers synced
+    const res = await writer2.view.get('e1')
+    t.alike(res, inputEntry, 'sanity check: processed by indexers')
     t.alike(viewDiscKey, writer1.view.discoveryKey, 'sanity check: view did not rotate')
   }
 })
 
 test.skip('3 indexers put entry not processed when only 1 indexer online', async (t) => {
   t.plan(6)
-  const tFirstPut = t.test.skip('first put')
+  const tFirstPut = t.test('first put')
   tFirstPut.plan(1)
-  const tPut2 = t.test.skip('second put')
+  const tPut2 = t.test('second put')
   tPut2.plan(1)
 
   const { bootstrap, writer1, writer2, writer3 } = await setup3IndexerService(t)

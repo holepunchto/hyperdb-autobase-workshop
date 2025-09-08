@@ -24,7 +24,13 @@ Using autobase solves both problems. For example, with 3 writer instances for th
   - 2 instances can go down and you will still accept requests (they will be processed when at least 1 of the other instances comes back)
   - 1 instance can be irrecoverably lost (for example due to a hard disk crash), and you can use the other 2 to rotate it out and rotate in a new instance
 
-In today's workshop, we will extend our AI-model registry of the previous workshop to use autobase. The steps are:
+In today's workshop, we will extend our AI-model registry of the previous workshop to use autobase.
+
+New tooling introduced includes:
+- Hyperdispatch
+- protomux-rpc and protomux-rpc-client
+
+The steps are:
 
 1) Create an autobase service with an add-writer operation
 2) Create an RPC layer, so records can be added remotely
@@ -35,6 +41,20 @@ In today's workshop, we will extend our AI-model registry of the previous worksh
 ## Demo
 
 ### 1. Create an autobase service with an add-writer operation
+
+The autobase will have the database defined in the previous workshop as view. Note how it is opened in `_openAutobase` and closed in `_closeAutobase`.
+
+We will use [hyperdispatch](https://github.com/holepunchto/hyperdispatch) for the autobase operations. Hyperdispatch makes it easier to define and maintain them.
+
+Hyperdispatch uses schemas, so we will extend our build.js file.
+
+Note: the schema will need a new definition for the `add-writer` operation, as well as a method to define the hyperdispatch schemas.
+
+### 2. Create an RPC layer
+
+This lets records be added remotely.
+
+The server side uses [Protomux RPC](https://github.com/holepunchto/protomux-rpc) to define the endpoints. The client side uses [Protomux-RPC Client](https://github.com/holepunchto/protomux-rpc-client) to access them.
 
 ## Assignment
 
