@@ -36,6 +36,7 @@
     "ready-resource": "^1.1.2"
   },
   "devDependencies": {
-    "brittle": "^3.18.0"
+    "brittle": "^3.18.0",
+    "standard": "^17.1.2"
   }
 }
