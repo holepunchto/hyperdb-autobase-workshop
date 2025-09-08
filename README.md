@@ -35,8 +35,7 @@ The steps are:
 1) Create an autobase service with an add-writer operation
 2) Create an RPC layer, so records can be added remotely
 3) Create a CLI to run the service
-4) Create a client to communicate with the RPC
-5) Deploy a 3-writer setup
+4) Deploy a 3-writer setup
 
 ## Demo
 
