@@ -2,7 +2,7 @@
 
 Builds on the [HyperDB Workshop](https://github.com/holepunchto/hyperdb-workshop), adding [autobase](https://github.com/holepunchto/autobase) to make it a multi-writer service.
 
-This workshop assumes you already have workign knowledge of autobase.
+This workshop assumes you already have working knowledge of autobase.
 
 ## Description
 
