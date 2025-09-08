@@ -12,7 +12,7 @@ const Registry = require('../lib/db')
 const DEBUG = false
 
 test.skip('Can add an additional indexer', async (t) => {
-  t.plan(1)
+  t.plan(2)
 
   const testnet = await getTestnet(t)
   const { bootstrap } = testnet
@@ -34,13 +34,19 @@ test.skip('Can add an additional indexer', async (t) => {
     store,
     swarm,
     {
-      bootstrap: service.base.key
+      autobaseBootstrap: service.base.key
     }
   )
   t.teardown(async () => {
     await service2.close()
     await swarm.destroy()
     await store.close()
+  })
+
+  service.base.on('update', async () => {
+    if (service.base.linearizer.indexers.length === 2) {
+      t.pass('original indexer processed the new indexer')
+    }
   })
 
   service2.base.once('is-indexer', () => {
